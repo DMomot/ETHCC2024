@@ -11,10 +11,10 @@ app = FastAPI()
 
 @app.get("/open")
 async def root(
-        address: AddressType,
-        contract_address: AddressType,
         amount: float,
         leverage: float,
+        address: AddressType = "0xe3411d7ba6e99d4228e304ed1bbb4dff14813070",
+        contract_address: AddressType = "0xe3411d7ba6e99d4228e304ed1bbb4dff14813070",
 ):
     ...
     return {
@@ -28,8 +28,8 @@ async def root(
 
 @app.get("/close")
 async def root(
-        address: AddressType,
-        contract_address: AddressType,
+        address: AddressType = "0xe3411d7ba6e99d4228e304ed1bbb4dff14813070",
+        contract_address: AddressType = "0xe3411d7ba6e99d4228e304ed1bbb4dff14813070",
 ):
     return {
         "address": address,
@@ -40,8 +40,8 @@ async def root(
 
 @app.get("/status")
 async def root(
-        address: AddressType,
-        contract_address: AddressType,
+        address: AddressType = "0xe3411d7ba6e99d4228e304ed1bbb4dff14813070",
+        contract_address: AddressType = "0xe3411d7ba6e99d4228e304ed1bbb4dff14813070",
 ):
     leverage = 10
     amount = 100 # usd
