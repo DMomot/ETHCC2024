@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "backend"
+version = "0.1.0"
+description = ""
+authors = ["git-alice <art.oxbow@gmail.com>"]
+readme = "README.md"
+packages = [{include = "backend", from="src"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.111.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
