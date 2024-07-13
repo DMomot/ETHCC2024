@@ -7,7 +7,6 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-
 def get_db():
     db = SessionLocal()
     try:
@@ -30,3 +29,7 @@ class Data(Base):
     telegram_link = Column(String, nullable=True)
     website_link = Column(String, nullable=True)
     confirmed_existence = Column(Boolean, nullable=False, default=False)
+
+# # Drop and recreate the table
+# Base.metadata.drop_all(bind=engine, tables=[Data.__table__])
+# Base.metadata.create_all(bind=engine)
