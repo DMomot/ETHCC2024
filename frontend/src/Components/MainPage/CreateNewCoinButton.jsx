@@ -10,7 +10,7 @@ import { Web3Context } from "../../providers/Web3Provider";
 import "./styles.css";
 import axios from "axios";
 
-export default function CreateNewCoinButton() {
+export default function CreateNewCoinButton({ afterCreate }) {
   const { setError, setSuccessMesage } = useContext(FeedbackContext);
   const { account } = useContext(Web3Context);
 
@@ -52,10 +52,7 @@ export default function CreateNewCoinButton() {
         bodyObj
       );
 
-      if (response.status === 200) {
-        setSuccessMesage("Coin data saved successfully");
-        setCreateModalOpen(false);
-      } else throw new Error(`Could not create coin`);
+      if (response.status !== 200) throw new Error(`Could not create coin`);
 
       // TODO:create coin on contract
 
@@ -65,10 +62,19 @@ export default function CreateNewCoinButton() {
           contract_address: _contractAddress,
         }
       );
+
+      if (responseUpdateExistence.status !== 200)
+        throw new Error(`Could not create coin`);
+
+      setSuccessMesage("Coin data saved successfully");
+      setCreateModalOpen(false);
+
       // TODO: if buy amount was not null also buy
     } catch (err) {
       console.log(`Save new coin data error: `, err);
+      setError(err.message);
     } finally {
+      afterCreate();
       setIsDataSubmitting(false);
     }
   };

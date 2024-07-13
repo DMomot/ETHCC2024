@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 
 export const FeedbackContext = createContext();
 
@@ -20,23 +20,27 @@ const FeedbackProvider = ({ children }) => {
     }
   }, [showSuccessMessage]);
 
+  const handleSetError = useCallback((error) => {
+    setError(error);
+    setShowError(true);
+  }, []);
+
+  const handleSetSuccessMesage = useCallback((message) => {
+    setSuccessMesage(message);
+    setShowSuccessMessage(true);
+  }, []);
+
   return (
     <FeedbackContext.Provider
       value={{
         error,
-        setError: (error) => {
-          setError(error);
-          setShowError(true);
-        },
+        setError: handleSetError,
         setShowError,
         showError,
         successMessage,
         showSuccessMessage,
         setShowSuccessMessage,
-        setSuccessMesage: (message) => {
-          setSuccessMesage(message);
-          setShowSuccessMessage(true);
-        },
+        setSuccessMesage: handleSetSuccessMesage,
       }}
     >
       {children}

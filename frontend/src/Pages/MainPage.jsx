@@ -14,6 +14,8 @@ export default function MainPage() {
   const { setError } = useContext(FeedbackContext);
 
   const fetchCoinsList = useCallback(async () => {
+    const timeStart = Date.now();
+
     setLoading(true);
     try {
       const response = await axios.get("http://localhost:8000/get_all_tokens/");
@@ -50,7 +52,13 @@ export default function MainPage() {
       console.log(`fetchCoinsList Error: `, err);
       setError(err.message);
     } finally {
-      setLoading(false);
+      const timeEnd = Date.now();
+      const diff = timeEnd - timeStart;
+      if (diff < 300) {
+        setTimeout(() => setLoading(false), 300 - diff);
+      } else {
+        setLoading(false);
+      }
     }
   }, [setLoading, setError]);
 
@@ -64,7 +72,7 @@ export default function MainPage() {
       <Stack
         sx={{ height: "120px", justifyContent: "center", alignItems: "center" }}
       >
-        <CreateNewCoinButton />
+        <CreateNewCoinButton afterCreate={fetchCoinsList} />
       </Stack>
       <Stack sx={{ padding: "0px 24px" }}>
         <CoinsCardsGrid coinsList={coinsList} loading={loading} />
