@@ -40,19 +40,20 @@ def add_data(
     return {"message": "Data added successfully!"}
 
 
-@app.put("/update_confirmed_existence/")
-def update_confirmed_existence(
+@app.put("/update_address/")
+def update_address(
         data_updated: DataUpdated,
         db: Session = Depends(get_db)
 ):
-    db_data = db.query(Data).filter(Data.contract_address == data_updated.contract_address).first()
+    db_data = db.query(Data).filter(Data.coin_name == data_updated.coin_name).filter(Data.coin_ticker == data_updated.coin_ticker).first()
     if not db_data:
         raise HTTPException(status_code=404, detail="Data not found")
 
     db_data.confirmed_existence = True
+    db_data.contract_address = data_updated.contract_address
     db.commit()
     db.refresh(db_data)
-    return {"message": "confirmed_existence updated successfully!"}
+    return {"message": "Contract updated successfully!"}
 
 
 @app.get("/get_token_info/", response_model=list[DataRead])

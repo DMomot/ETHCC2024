@@ -4,8 +4,8 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import "./styles.css";
-import { IconButton, TextField } from "@mui/material";
-import RefreshIcon from "@mui/icons-material/Refresh";
+// import IconButton from "@mui/material/IconButton";
+// import RefreshIcon from "@mui/icons-material/Refresh";
 
 import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
@@ -42,11 +42,11 @@ export default function TokenBuySellCard({ coin, loading }) {
                   {coin.coin_name} ({coin.coin_ticker})
                 </Typography>
               </Stack>
-              <Stack>
+              {/* <Stack>
                 <IconButton sx={{ borderRadius: 2, padding: "2px 4px" }}>
                   <RefreshIcon />
                 </IconButton>
-              </Stack>
+              </Stack> */}
             </Stack>
             <ToggleButtonGroup
               color="primary"

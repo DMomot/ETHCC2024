@@ -35,3 +35,5 @@ class DataRead(BaseModel):
 
 class DataUpdated(BaseModel):
     contract_address: str
+    coin_name: str
+    coin_ticker: str

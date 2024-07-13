@@ -12,7 +12,7 @@ import axios from "axios";
 
 export default function CreateNewCoinButton({ afterCreate }) {
   const { setError, setSuccessMesage } = useContext(FeedbackContext);
-  const { account } = useContext(Web3Context);
+  const { account, createToken } = useContext(Web3Context);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [dataSubmitting, setIsDataSubmitting] = useState(false);
@@ -32,12 +32,9 @@ export default function CreateNewCoinButton({ afterCreate }) {
         throw new Error("Please fill in all required fields");
       }
 
-      // TODO: change for real address
-      const _contractAddress = generateRandomString();
-
       const bodyObj = {
         chain_id: Number(window.ethereum.chainId),
-        contract_address: _contractAddress,
+        contract_address: "",
         coin_name: vals.coin_name,
         coin_ticker: vals.coin_ticker,
         coin_description: vals.coin_description,
@@ -55,12 +52,18 @@ export default function CreateNewCoinButton({ afterCreate }) {
 
       if (response.status !== 200) throw new Error(`Could not create coin`);
 
-      // TODO:create coin on contract
+      const _contractAddress = await createToken(
+        vals.coin_name,
+        vals.coin_ticker
+      );
+      if (!_contractAddress) throw new Error(`Could not create coin`);
 
       const responseUpdateExistence = await axios.put(
-        "http://localhost:8000/update_confirmed_existence/",
+        "http://localhost:8000/update_address/",
         {
           contract_address: _contractAddress,
+          coin_name: vals.coin_name,
+          coin_ticker: vals.coin_ticker,
         }
       );
 
@@ -79,17 +82,6 @@ export default function CreateNewCoinButton({ afterCreate }) {
       setIsDataSubmitting(false);
     }
   };
-
-  function generateRandomString(size = 16) {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let randomString = "";
-    for (let i = 0; i < size; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      randomString += characters.charAt(randomIndex);
-    }
-    return randomString;
-  }
 
   const getBase64DataUrlFromImageFile = async (_image) => {
     const targetWidth = 400;

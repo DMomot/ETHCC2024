@@ -94,7 +94,6 @@ export default function CreateNewCoinForm({ saveData, dataSubmitting }) {
   const {
     register,
     formState: { errors },
-    handleSubmit,
     watch,
     trigger,
     getValues,
@@ -289,7 +288,7 @@ export default function CreateNewCoinForm({ saveData, dataSubmitting }) {
           </Stack>
         ) : null}
         <Typography sx={{ width: "100%", textAlign: "center" }}>
-          Cost to deploy ~0.2 SOL
+          Cost to deploy ~0.000001 ETH
         </Typography>
         <Stack direction="row" justifyContent="space-between">
           {step === 1 ? (
