@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 
-from backend.db import get_db, Data
+from backend.db import get_db, Data, clear_db
 from backend.models import DataCreate, DataRead, DataUpdated
 from backend.logs import get_logs
 
@@ -17,18 +17,13 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
-
-# # Drop and recreate the table
-# Base.metadata.drop_all(bind=engine, tables=[Data.__table__])
-# Base.metadata.create_all(bind=engine)
-
-
 @app.post("/add_data/")
 def add_data(
         data: DataCreate,
         db: Session = Depends(get_db)
 ):
     db_data = Data(
+        chain_id=data.chain_id,
         contract_address=data.contract_address,
         coin_name=data.coin_name,
         coin_ticker=data.coin_ticker,
@@ -89,6 +84,11 @@ def get_swaps(
         contract_address=contract_address,
     )
     return logs
+
+
+@app.get("/clear_db/")
+def _clear_db():
+    clear_db()
 
 
 if __name__ == "__main__":

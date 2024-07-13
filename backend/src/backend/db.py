@@ -15,6 +15,12 @@ def get_db():
         db.close()
 
 
+def clear_db():
+    # Drop and recreate the table
+    Base.metadata.drop_all(bind=engine, tables=[Data.__table__])
+    Base.metadata.create_all(bind=engine)
+
+
 class Data(Base):
     __tablename__ = "data"
     id = Column(Integer, primary_key=True, index=True)
