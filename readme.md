@@ -16,11 +16,11 @@ Plan:
       - tokenId -> contract_address
       - [*] new exp curve
    - Timur / Lesha
-      - add update_token
+      - add update_confirmed_existence [v]
       - change data model for add_data
-        - multichain
-        - id -> contract_address
-      - [*] /token_swaps/ - get swaps events
+        - multichain [v?]
+        - id -> contract_address [v]
+      - [*] /token_swaps/ - get swaps events [v?]
    - Alina
      - show image
      - create
