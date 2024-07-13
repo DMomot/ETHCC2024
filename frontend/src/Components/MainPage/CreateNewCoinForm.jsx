@@ -64,7 +64,7 @@ const createNewCoinFormConfig = {
   },
 };
 
-const CustomTextField = styled(TextField)(({ theme }) => ({
+export const CustomTextField = styled(TextField)(({ theme }) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
     padding: "12px 14px",

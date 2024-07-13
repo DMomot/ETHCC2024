@@ -57,15 +57,14 @@ export default function CreateNewCoinButton() {
         setCreateModalOpen(false);
       } else throw new Error(`Could not create coin`);
 
-      console.log(_contractAddress, "_contractAddress");
-      const responseBatch = await axios.put(
+      // TODO:create coin on contract
+
+      const responseUpdateExistence = await axios.put(
         "http://localhost:8000/update_confirmed_existence/",
         {
           contract_address: _contractAddress,
         }
       );
-      console.log(responseBatch, "responseBatch");
-      // TODO: alert back for updationg confirmed_existence field to put the coin into the list
       // TODO: if buy amount was not null also buy
     } catch (err) {
       console.log(`Save new coin data error: `, err);

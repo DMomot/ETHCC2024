@@ -82,8 +82,8 @@ export default function CoinCard({ loading, coin }) {
         component="img"
         alt={`logo for ${coin.coin_name}`}
         height="140"
-        image="/logo512.png"
-        sx={{ objectFit: "contain", padding: "20px" }}
+        image={coin.image}
+        sx={{ objectFit: "contain" }}
       />
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
