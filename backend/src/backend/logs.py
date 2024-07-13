@@ -1,4 +1,5 @@
 import requests
+import pandas as pd
 from eth_abi import decode
 from datetime import datetime
 
@@ -18,6 +19,7 @@ def decode_hex_structure(hex_string: str, types: list[str]) -> list[int]:
 def get_logs(
         chain: int,
         contract_address: str,
+        agg: str,
 ):
     if chain == 1:
         chain = 'eth'
@@ -26,7 +28,7 @@ def get_logs(
 
     params = {
       "chain": chain,
-      "order": "DESC",
+      "order": "ASC",
       "address": contract_address,
       "topic0": "0x80d4cbb858c41178f89d481e5a49cc1e0c8bc9128abc1002f79c70b4d2f08436"
     }
@@ -42,7 +44,7 @@ def get_logs(
     result = []
     for xxx in response.json()['result']:
         _data = xxx['data']
-        timestamp = int(datetime.fromisoformat(xxx['block_timestamp']).timestamp())
+        timestamp = datetime.fromisoformat(xxx['block_timestamp'])
         reserves0, reserves1 = decode_hex_structure(
             hex_string=_data,
             types=['uint256', 'uint256']
@@ -52,12 +54,25 @@ def get_logs(
             'price': reserves0 / reserves1,
         })
 
-    return result
+    df = pd.DataFrame(result)
+    df = df.set_index('timestamp')
+    df.index = df.index.floor(agg)
+    df = df.reset_index()
+
+    df = df.groupby('timestamp').agg(
+        low=pd.NamedAgg(column="price", aggfunc="min"),
+        high=pd.NamedAgg(column="price", aggfunc="max"),
+        open=pd.NamedAgg(column="price", aggfunc="first"),
+        close=pd.NamedAgg(column="price", aggfunc="last"),
+    ).reset_index()
+    records = df.to_dict('records')
+    return records
 
 
 if __name__ == "__main__":
     logs = get_logs(
         chain=8453,
         contract_address="0x5E7fCAB67D17D5536657C2788281B036e12aEe18",
+        agg='1min'
     )
     print(logs)

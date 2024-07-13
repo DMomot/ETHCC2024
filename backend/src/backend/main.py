@@ -78,10 +78,12 @@ def get_all_tokens(
 def get_swaps(
         chain: int = Query(...),
         contract_address: str = Query(...),
+        agg: str = '1min',
 ):
     logs = get_logs(
         chain=chain,
         contract_address=contract_address,
+        agg=agg,
     )
     return logs
 
