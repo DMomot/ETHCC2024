@@ -18,9 +18,9 @@ Plan:
    - Timur / Lesha
       - add update_confirmed_existence [v]
       - change data model for add_data
-        - multichain [v?]
+        - multichain [v]
         - id -> contract_address [v]
-      - [*] /token_swaps/ - get swaps events [v?]
+      - [*] /token_swaps/ - get swaps events [v]
    - Alina
      - show image
      - create
