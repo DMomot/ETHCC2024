@@ -192,8 +192,6 @@ export default function CreateNewCoinForm({ saveData, dataSubmitting }) {
       return;
     }
     // Check here if enough resources
-    // TODO: add market logic
-    // TODO: add flag submitted to DB & then confirmed from contract by job on backend
     await saveData(getValues());
   };
 

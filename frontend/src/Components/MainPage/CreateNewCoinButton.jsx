@@ -12,7 +12,7 @@ import axios from "axios";
 
 export default function CreateNewCoinButton({ afterCreate }) {
   const { setError, setSuccessMesage } = useContext(FeedbackContext);
-  const { account, createToken } = useContext(Web3Context);
+  const { account, createToken, buyToken } = useContext(Web3Context);
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [dataSubmitting, setIsDataSubmitting] = useState(false);
@@ -70,10 +70,25 @@ export default function CreateNewCoinButton({ afterCreate }) {
       if (responseUpdateExistence.status !== 200)
         throw new Error(`Could not create coin`);
 
-      setSuccessMesage("Coin data saved successfully");
-      setCreateModalOpen(false);
+      let buyError = false;
 
-      // TODO: if buy amount was not null also buy
+      console.log(vals.buy_amount, "vals.buy_amount)");
+      if (vals.buy_amount) {
+        const _buyAmount = parseFloat(vals.buy_amount);
+
+        if (_buyAmount && _buyAmount > 0) {
+          const buyRes = await buyToken(_contractAddress, _buyAmount);
+          if (!buyRes) {
+            buyError = true;
+            setError(`Could not buy token (but coin data saved successfully)`);
+          }
+        }
+      }
+      if (!buyError) {
+        setSuccessMesage("Coin data saved successfully");
+      }
+
+      setCreateModalOpen(false);
     } catch (err) {
       console.log(`Save new coin data error: `, err);
       setError(err.message);
