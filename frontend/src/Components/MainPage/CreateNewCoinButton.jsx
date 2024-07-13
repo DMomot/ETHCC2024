@@ -36,6 +36,7 @@ export default function CreateNewCoinButton({ afterCreate }) {
       const _contractAddress = generateRandomString();
 
       const bodyObj = {
+        chain_id: Number(window.ethereum.chainId),
         contract_address: _contractAddress,
         coin_name: vals.coin_name,
         coin_ticker: vals.coin_ticker,
