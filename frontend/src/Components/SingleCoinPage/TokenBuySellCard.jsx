@@ -34,6 +34,7 @@ export default function TokenBuySellCard({ coin, loading }) {
       if (!response) {
         throw new Error(`Could not ${mode} token`);
       } else {
+        setAmount("");
         setSuccessMesage(
           `Token was successfully ${mode === "buy" ? "bought" : "sold"}`
         );
@@ -118,7 +119,7 @@ export default function TokenBuySellCard({ coin, loading }) {
           </Stack>
           <Stack spacing={2}>
             <CustomTextField
-              label="Amount"
+              label="Amount (ETH)"
               key="amount_token"
               variant="outlined"
               fullWidth

@@ -1,6 +1,6 @@
-export const address = "0x0d459562801172E5aE6eD4212c695C1c8815f337";
+export const launchpadAddress = "0x0d459562801172E5aE6eD4212c695C1c8815f337";
 
-export const abi = [
+export const launchpadAbi = [
   {
     inputs: [
       {
@@ -291,6 +291,30 @@ export const abi = [
       },
     ],
     stateMutability: "view",
+    type: "function",
+  },
+];
+
+export const erc20Abi = [
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_spender",
+        type: "address",
+      },
+      {
+        name: "_value",
+        type: "uint256",
+      },
+    ],
+    name: "approve",
+    outputs: [
+      {
+        name: "",
+        type: "bool",
+      },
+    ],
     type: "function",
   },
 ];

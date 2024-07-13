@@ -6,8 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import Web3 from "web3";
-import { abi, address } from "../web3/launchpad";
-// import { Button } from "@mui/material";
+import { launchpadAbi, erc20Abi, launchpadAddress } from "../web3/launchpad";
 
 export const Web3Context = createContext();
 
@@ -47,7 +46,7 @@ const Web3Provider = ({ children }) => {
   const launchpadContract = useMemo(() => {
     if (!web3) return;
 
-    return new web3.eth.Contract(abi, address);
+    return new web3.eth.Contract(launchpadAbi, launchpadAddress);
   }, [web3]);
 
   const createToken = useCallback(
@@ -83,21 +82,25 @@ const Web3Provider = ({ children }) => {
       if (!account) return;
       if (!token_address || !amount) return;
 
+      console.log(token_address, 0, web3.utils.toWei(amount, "ether"));
+      console.log(
+        account,
+        web3.utils.toWei(amount, "ether"),
+        web3.utils.toWei("0.0004", "gwei"),
+        web3.utils.toWei("0.0004", "gwei")
+      );
       try {
-        // TODO: add this buy part
+        const res = await launchpadContract.methods
+          .swap(token_address, 0, web3.utils.toWei(amount, "ether"))
+          .send({
+            from: account,
+            value: web3.utils.toWei(amount, "ether"),
+            maxPriorityFeePerGas: web3.utils.toWei("0.04", "gwei"),
+            maxFeePerGas: web3.utils.toWei("0.04", "gwei"),
+          });
 
-        // const res = await launchpadContract.methods
-        //   .swap(token_address, amount, 0)
-        //   .send({
-        //     from: account,
-        //     value: web3.utils.toWei("0.000001", "ether"),
-        //     maxPriorityFeePerGas: web3.utils.toWei("0.004", "gwei"),
-        //     maxFeePerGas: web3.utils.toWei("0.004", "gwei"),
-        //   });
+        if (!res) throw new Error(`Could now buy token`);
 
-        // if (!res) throw new Error(`Could now buy token`);
-        // TODO delete this console.log
-        console.log(launchpadContract, account, web3);
         return true;
       } catch (err) {
         console.log("Buy token error: ", err);
@@ -108,25 +111,35 @@ const Web3Provider = ({ children }) => {
   );
 
   const sellToken = useCallback(
-    async (name, symbol) => {
+    async (token_address, amount) => {
       if (!account) return;
-      if (!name || !symbol) return;
+      if (!token_address || !amount) return;
 
       try {
-        // TODO: add this buy part
+        const tokenContract = new web3.eth.Contract(erc20Abi, token_address);
 
-        // const res = await launchpadContract.methods
-        //   .swap(token_address, amount, 0)
-        //   .send({
-        //     from: account,
-        //     value: web3.utils.toWei("0.000001", "ether"),
-        //     maxPriorityFeePerGas: web3.utils.toWei("0.004", "gwei"),
-        //     maxFeePerGas: web3.utils.toWei("0.004", "gwei"),
-        //   });
+        const approveRes = await tokenContract.methods
+          .approve(launchpadAddress, web3.utils.toWei(amount, "ether"))
+          .send({
+            from: account,
+            value: web3.utils.toWei("0", "ether"),
+            maxPriorityFeePerGas: web3.utils.toWei("0.04", "gwei"),
+            maxFeePerGas: web3.utils.toWei("0.04", "gwei"),
+          });
 
-        // if (!res) throw new Error(`Could now sell token`);
-        // TODO delete this console.log
-        console.log(launchpadContract, account, web3);
+        if (!approveRes) throw new Error();
+
+        const sellRes = await launchpadContract.methods
+          .swap(token_address, web3.utils.toWei(amount, "ether"), 0)
+          .send({
+            from: account,
+            value: web3.utils.toWei("0", "ether"),
+            maxPriorityFeePerGas: web3.utils.toWei("0.04", "gwei"),
+            maxFeePerGas: web3.utils.toWei("0.04", "gwei"),
+          });
+
+        if (!sellRes) throw new Error(`Could now sell token`);
+
         return true;
       } catch (err) {
         console.log("Sell token error: ", err);
@@ -147,13 +160,6 @@ const Web3Provider = ({ children }) => {
         sellToken,
       }}
     >
-      {/* <Button
-        onClick={() =>
-          buyToken("0x2d994dF70495074734aab6c81faC1b1fB3C6D403", 1)
-        }
-      >
-        Click me
-      </Button> */}
       {children}
     </Web3Context.Provider>
   );

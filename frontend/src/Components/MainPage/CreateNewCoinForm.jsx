@@ -56,7 +56,7 @@ const createNewCoinFormConfig = {
       step: 1,
     },
     buy_amount: {
-      label: "Buy amount",
+      label: "Buy amount (ETH)",
       key: "buy_amount",
       required: false,
       step: 2,
