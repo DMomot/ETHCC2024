@@ -72,12 +72,17 @@ class DataRead(BaseModel):
     class Config:
         from_attributes = True
 
+class DataUpdated(BaseModel):
+    contract_address: str
+
+
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
+
 
 @app.post("/add_data/")
 def add_data(data: DataCreate, db: Session = Depends(get_db)):
@@ -114,21 +119,21 @@ def get_all_tokens(
     query = db.query(Data)
     return query.all()
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
 @app.put("/update_confirmed_existence/")
 def update_confirmed_existence(
-    contract_address: str = Body(...), 
+    data_updated: DataUpdated,
     db: Session = Depends(get_db)
 ):
-    print(contract_address, 'contract_address')
-    db_data = db.query(Data).filter(Data.contract_address == contract_address).first()
+    db_data = db.query(Data).filter(Data.contract_address == data_updated.contract_address).first()
     if not db_data:
         raise HTTPException(status_code=404, detail="Data not found")
     
     db_data.confirmed_existence = True
     db.commit()
     db.refresh(db_data)
-    return { "message": "confirmed_existence updated successfully!" }
+    return {"message": "confirmed_existence updated successfully!" }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
