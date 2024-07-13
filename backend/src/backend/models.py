@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class DataCreate(BaseModel):
+    chain_id: int
     contract_address: str
     coin_name: str
     coin_ticker: str
@@ -16,6 +17,7 @@ class DataCreate(BaseModel):
 
 class DataRead(BaseModel):
     id: int
+    chain_id: int
     contract_address: str
     coin_name: str
     coin_ticker: str

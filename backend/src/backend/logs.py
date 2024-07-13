@@ -53,7 +53,7 @@ def get_logs(
 
 if __name__ == "__main__":
     logs = get_logs(
-        chain='base',
-        address="0xb7a5484C5688C2b462aAC4F6A894dF673CA4f194",
+        chain=8453,
+        contract_address="0xb7a5484C5688C2b462aAC4F6A894dF673CA4f194",
     )
     print(logs)
