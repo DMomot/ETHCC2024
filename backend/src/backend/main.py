@@ -2,15 +2,23 @@ import re
 from typing import Annotated
 
 from annotated_types import Interval, Len, Predicate
+from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi import FastAPI, HTTPException, Depends, Query
+from fastapi import FastAPI, HTTPException, Depends, Query, Body
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"], 
+)
 AddressType = Annotated[str, Len(min_length=42, max_length=42), Predicate(re.compile("^0x[0-9a-fA-F]*$").search)]
 
 DATABASE_URL = "sqlite:///./test.db"
@@ -30,6 +38,7 @@ class Data(Base):
     twitter_link = Column(String, nullable=True)
     telegram_link = Column(String, nullable=True)
     website_link = Column(String, nullable=True)
+    confirmed_existence = Column(Boolean, nullable=False, default=False)
 
 # # Drop and recreate the table
 # Base.metadata.drop_all(bind=engine, tables=[Data.__table__])
@@ -45,6 +54,7 @@ class DataCreate(BaseModel):
     twitter_link: str = None
     telegram_link: str = None
     website_link: str = None
+    confirmed_existence: bool = False
 
 class DataRead(BaseModel):
     id: int
@@ -57,6 +67,7 @@ class DataRead(BaseModel):
     twitter_link: str = None
     telegram_link: str = None
     website_link: str = None
+    confirmed_existence: bool = False
 
     class Config:
         from_attributes = True
@@ -106,3 +117,18 @@ def get_all_tokens(
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.put("/update_confirmed_existence/")
+def update_confirmed_existence(
+    contract_address: str = Body(...), 
+    db: Session = Depends(get_db)
+):
+    print(contract_address, 'contract_address')
+    db_data = db.query(Data).filter(Data.contract_address == contract_address).first()
+    if not db_data:
+        raise HTTPException(status_code=404, detail="Data not found")
+    
+    db_data.confirmed_existence = True
+    db.commit()
+    db.refresh(db_data)
+    return { "message": "confirmed_existence updated successfully!" }

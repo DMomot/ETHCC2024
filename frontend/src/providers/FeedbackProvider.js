@@ -4,12 +4,12 @@ export const FeedbackContext = createContext();
 
 const FeedbackProvider = ({ children }) => {
   const [error, setError] = useState(null);
-  const [showError, setShowError] = useState(false);
+  const [showError, setShowError] = useState(null);
   const [successMessage, setSuccessMesage] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(null);
 
   useEffect(() => {
-    if (!showError) {
+    if (typeof showError === "boolean" && !showError) {
       setTimeout(() => setError(null), 500);
     }
   }, [showError]);

@@ -1,13 +1,18 @@
-import React, { useState } from "react";
+import React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import { IconButton, Button, Typography, Stack } from "@mui/material";
+import { IconButton, Typography, Stack } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CreateNewCoinForm from "./CreateNewCoinForm";
 
 import "./styles.css";
 
-export default function CreateNewCoinButton({ open, onClose }) {
+export default function CreateNewCoinButton({
+  open,
+  onClose,
+  saveData,
+  dataSubmitting,
+}) {
   return (
     <Dialog
       open={open}
@@ -27,7 +32,10 @@ export default function CreateNewCoinButton({ open, onClose }) {
               <CloseIcon />
             </IconButton>
           </Stack>
-          <CreateNewCoinForm />
+          <CreateNewCoinForm
+            saveData={saveData}
+            dataSubmitting={dataSubmitting}
+          />
         </Stack>
       </DialogContent>
     </Dialog>

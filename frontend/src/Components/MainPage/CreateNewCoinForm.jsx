@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Web3Context } from "../../providers/Web3Provider";
-import { FeedbackContext } from "../../providers/FeedbackProvider";
 
 const createNewCoinFormConfig = {
   required: {
@@ -78,9 +77,8 @@ const CustomTextField = styled(TextField)(({ theme }) => ({
   },
 }));
 
-export default function CreateNewCoinForm() {
+export default function CreateNewCoinForm({ saveData, dataSubmitting }) {
   const { account, handleConnectWallet } = useContext(Web3Context);
-  const { setError, setSuccessMesage } = useContext(FeedbackContext);
 
   const [step, setStep] = useState(0);
   const [visitedStep, setVisitedStep] = useState({
@@ -139,54 +137,6 @@ export default function CreateNewCoinForm() {
     });
   }, [_name, _descr, _ticker, _image, visitedStep]);
 
-  const scaleAndSendImage = async () => {
-    // try {
-    //   setIsLoading(true);
-    //   setErrorMessage(null);
-    //   const _image = fileList[0];
-    //   const targetWidth = 400;
-    //   if (!_image) {
-    //     return;
-    //   }
-    //   const loadImage = (file) =>
-    //     new Promise((resolve) => {
-    //       const reader = new FileReader();
-    //       reader.onload = (event) => {
-    //         const img = new Image();
-    //         img.onload = () => resolve(img);
-    //         img.src = event.target.result;
-    //       };
-    //       reader.readAsDataURL(file);
-    //     });
-    //   // Load and scale the image
-    //   const image = await loadImage(_image);
-    //   const scaleFactor = targetWidth / image.width;
-    //   const targetHeight = image.height * scaleFactor;
-    //   // Create a canvas and draw the scaled image
-    //   const canvas = document.createElement('canvas');
-    //   canvas.width = targetWidth;
-    //   canvas.height = targetHeight;
-    //   const ctx = canvas.getContext('2d');
-    //   ctx.drawImage(image, 0, 0, targetWidth, targetHeight);
-    //   // Get the base64 data URL
-    //   const base64DataUrl = canvas.toDataURL(_image.type);
-    //   const response = await buildings.uploadBuildingImage(buildingId, {
-    //     filename: _image.coin_name,
-    //     content: base64DataUrl,
-    //     fileType: _image.type,
-    //   });
-    //   if (isValidResponse(response)) {
-    //     refetch();
-    //     setValue('image', []);
-    //     setIsLoading(false);
-    //   } else throw new Error(getErrorMessageFromResponse(response));
-    // } catch (err) {
-    //   console.error(err);
-    //   setErrorMessage('Something went wrong. Please try again.');
-    //   setIsLoading(false);
-    // }
-  };
-
   /**
    * @param {'required' | 'optional'} key
    */
@@ -243,14 +193,13 @@ export default function CreateNewCoinForm() {
       return;
     }
     // Check here if enough resources
-
-    console.log(account, "account");
-    //setError("Test erorr");
-    setSuccessMesage("Test success");
+    // TODO: add market logic
+    // TODO: add flag submitted to DB & then confirmed from contract by job on backend
+    await saveData(getValues());
   };
 
   return (
-    <form onSubmit={handleSubmit(scaleAndSendImage)}>
+    <form>
       <Stack spacing={2}>
         <Stepper nonLinear activeStep={step}>
           {steps.map((label, index) => (
@@ -344,13 +293,18 @@ export default function CreateNewCoinForm() {
         </Typography>
         <Stack direction="row" justifyContent="space-between">
           {step === 1 ? (
-            <Button onClick={() => handleStep(step - 1)}>Back</Button>
+            <Button
+              onClick={() => handleStep(step - 1)}
+              disabled={dataSubmitting}
+            >
+              Back
+            </Button>
           ) : null}
           <Button
             sx={{ ml: "auto" }}
             fullWidth={step === 0}
             onClick={() => handleStep(step + 1)}
-            disabled={nextDisabled[step]}
+            disabled={nextDisabled[step] || dataSubmitting}
           >
             {step === 1 ? (account ? "Create coin" : "Connect wallet") : "Next"}
           </Button>
