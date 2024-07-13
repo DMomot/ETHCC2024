@@ -1,5 +1,6 @@
 import requests
 from eth_abi import decode
+from datetime import datetime
 
 api_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6ImNlZGNmMmQyLWNiOGUtNDU3Yy05N2RiLWQ4ZmRiZWYyZjk1NSIsIm9yZ0lkIjoiNDQ1MTYiLCJ1c2VySWQiOiI0NDUyNCIsInR5cGVJZCI6ImFkODc2OWY0LWJjN2QtNDkyZC04ODdhLTAzMmIyY2NkNjRhNiIsInR5cGUiOiJQUk9KRUNUIiwiaWF0IjoxNzAwMzEyOTg3LCJleHAiOjQ4NTYwNzI5ODd9.Jnf9Bx1P_YMIIsk94bMoz-YDxQdFJCwFrd1Eq2BiSNQ"
 
@@ -27,7 +28,7 @@ def get_logs(
       "chain": chain,
       "order": "DESC",
       "address": contract_address,
-      "topic0": "0xfdd7154be8ed418d4ca3d531c5bfad489769355855537c63d6b9052177c03078"
+      "topic0": "0x80d4cbb858c41178f89d481e5a49cc1e0c8bc9128abc1002f79c70b4d2f08436"
     }
 
     response = requests.get(
@@ -41,12 +42,15 @@ def get_logs(
     result = []
     for xxx in response.json()['result']:
         _data = xxx['data']
-        result.append(
-            decode_hex_structure(
-                hex_string=_data,
-                types=['uint256', 'address', 'int256', 'uint256']
-            )
+        timestamp = int(datetime.fromisoformat(xxx['block_timestamp']).timestamp())
+        reserves0, reserves1 = decode_hex_structure(
+            hex_string=_data,
+            types=['uint256', 'uint256']
         )
+        result.append({
+            'timestamp': timestamp,
+            'price': reserves0 / reserves1,
+        })
 
     return result
 
@@ -54,6 +58,6 @@ def get_logs(
 if __name__ == "__main__":
     logs = get_logs(
         chain=8453,
-        contract_address="0xb7a5484C5688C2b462aAC4F6A894dF673CA4f194",
+        contract_address="0x5E7fCAB67D17D5536657C2788281B036e12aEe18",
     )
     print(logs)
