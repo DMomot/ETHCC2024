@@ -45,7 +45,7 @@ contract Launchpad is Ownable {
         tokens[tokenIdCounter] = Token({
             name: name,
             symbol: symbol,
-            reserve0: 10**4,
+            reserve0: 10**18,
             reserve1: msg.value,
             tokenAddress: address(newToken)
         });
