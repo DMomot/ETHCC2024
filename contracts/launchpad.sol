@@ -5,7 +5,7 @@ import "./token.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
-// import "@uniswap/v2-periphery/contracts/interfaces/IERC20.sol";
+import { SD59x18, convert } from "@prb/math/src/SD59x18.sol";
 
 contract Launchpad is Ownable {
     uint256 public constant TOKEN_PRICE = 1 wei;
@@ -17,7 +17,7 @@ contract Launchpad is Ownable {
     struct Token {
         string name;
         string symbol;
-        uint256 reserve0; // токены
+        uint256 reserve0; // tokens
         uint256 reserve1; // ETH
         address tokenAddress;
     }
@@ -27,7 +27,9 @@ contract Launchpad is Ownable {
 
     event TokenCreated(uint256 tokenId, address tokenAddress, string name, string symbol, uint256 initialSupply);
     event TokensSwapped(uint256 tokenId, address tokenAddress, int256 amount0, int256 amount1);
+    event Reserves(uint256 reserve0, uint256 reserve1);
     event PoolCreated(address poolAddress);
+    event DebugLog2(string name, int256 value);
 
     constructor(address _uniswapRouter, address _uniswapFactory) {
         uniswapRouter = _uniswapRouter;
@@ -43,8 +45,8 @@ contract Launchpad is Ownable {
         tokens[tokenIdCounter] = Token({
             name: name,
             symbol: symbol,
-            reserve0: 10**4, // начальный запас токенов
-            reserve1: msg.value, // ETH, отправленный при создании токена
+            reserve0: 10**18,
+            reserve1: msg.value,
             tokenAddress: address(newToken)
         });
 
@@ -66,6 +68,7 @@ contract Launchpad is Ownable {
         uint256 amountOut;
 
         if (amount0In > 0) { // Swap Tokens to ETH
+            require(IERC20(token.tokenAddress).transferFrom(msg.sender, address(this), amount0In), "Token transfer failed");
             uint256 newReserve0 = token.reserve0 + amount0In;
             uint256 newReserve1 = k / newReserve0;
 
@@ -79,25 +82,46 @@ contract Launchpad is Ownable {
         } else { // Swap ETH to Tokens
             require(msg.value == amount1In, "Incorrect ETH amount sent");
 
-            // Пересчитываем количество токенов
             uint256 newReserve1 = token.reserve1 + amount1In;
-            uint256 newReserve0 = k / newReserve1;
+            uint256 newReserve0 = calculateReserves0(int256(newReserve1));
 
             amountOut = token.reserve0 - newReserve0;
 
             require(amountOut <= token.reserve0, "Not enough tokens in reserve");
 
-            // Обновляем резервы
             token.reserve1 = newReserve1;
             token.reserve0 = newReserve0;
 
-            // Переводим токены пользователю
             require(IERC20(token.tokenAddress).transfer(msg.sender, amountOut), "Token transfer failed");
             emit TokensSwapped(tokenId, token.tokenAddress, -1 * int256(amountOut), int256(amount1In));
         }
+        emit Reserves(token.reserve1, token.reserve0);
     }
 
-    // Функция для создания пула в Uniswap V2
+    function calculateReserves0(int256 reserves1) public returns (uint256) {
+        int256 a = 11345; // 0.11345 * 10^5
+        int256 a_scale = 10 ** 5;
+        int256 b = 2 * 6; // 2 * 0.00000000000000006 * 10^18
+
+        int256 b_scale = 10 ** 18;
+        int256 base_scale = 10 ** 18;
+
+        SD59x18 a_fixed = convert(a);
+        SD59x18 a_scale_fixed = convert(a_scale);
+        SD59x18 b_fixed = convert(b);
+        SD59x18 b_scale_fixed = convert(b_scale);
+        SD59x18 base_scale_fixed = convert(base_scale);
+        SD59x18 reserves1_fixed = convert(reserves1);
+
+        SD59x18 exponent = b_fixed.div(b_scale_fixed).mul(reserves1_fixed);
+
+        SD59x18 exp_result = exponent.exp();
+
+        SD59x18 result = reserves1_fixed.div(a_fixed.div(a_scale_fixed).mul(exp_result)).div(base_scale_fixed);
+
+        return uint256(result.unwrap());
+    }
+
     function createPool(address tokenAddress) public onlyOwner {
         IUniswapV2Router02 router = IUniswapV2Router02(uniswapRouter);
         IUniswapV2Factory factory = IUniswapV2Factory(uniswapFactory);
@@ -105,17 +129,13 @@ contract Launchpad is Ownable {
         uint256 tokenId = _userTokensId[tokenAddress];
         Token storage token = tokens[tokenId];
 
-        // Получаем все токены на контракте
         uint256 allTokenAmount = IERC20(tokenAddress).balanceOf(address(this));
         require(allTokenAmount > 0, "No tokens available for liquidity");
 
-        // Используем все токены и часть резервов ETH для ликвидности
         uint256 ethToAdd = token.reserve1;
 
-        // Проверяем, существует ли уже пул
         address pool = factory.getPair(tokenAddress, router.WETH());
         if (pool == address(0)) {
-            // Создаем новый пул
             pool = factory.createPair(tokenAddress, router.WETH());
         }
 
@@ -135,7 +155,6 @@ contract Launchpad is Ownable {
         emit PoolCreated(tokenAddress);
     }
 
-    // Функция для получения резервов токенов и ETH
     function getReserves(uint256 tokenId) public view returns (uint256 reserve0, uint256 reserve1) {
         Token memory token = tokens[tokenId];
         return (token.reserve0, token.reserve1);
