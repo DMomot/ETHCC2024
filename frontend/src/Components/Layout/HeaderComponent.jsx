@@ -52,7 +52,7 @@ export default function HeaderComponent() {
             cursor: "pointer",
           }}
         ></img>
-        <Typography>LeverageShit</Typography>
+        <Typography>FairPump</Typography>
       </Stack>
       <ConnectWalletButton
         onClick={handleConnectWallet}

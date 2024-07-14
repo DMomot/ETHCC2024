@@ -60,8 +60,8 @@ const Web3Provider = ({ children }) => {
           .send({
             from: account,
             value: web3.utils.toWei("0.000001", "ether"),
-            maxPriorityFeePerGas: web3.utils.toWei("0.004", "gwei"),
-            maxFeePerGas: web3.utils.toWei("0.004", "gwei"),
+            maxPriorityFeePerGas: web3.utils.toWei("0.04", "gwei"),
+            maxFeePerGas: web3.utils.toWei("0.04", "gwei"),
           });
 
         const tokenContractAddress =
@@ -86,8 +86,8 @@ const Web3Provider = ({ children }) => {
       console.log(
         account,
         web3.utils.toWei(amount, "ether"),
-        web3.utils.toWei("0.0004", "gwei"),
-        web3.utils.toWei("0.0004", "gwei")
+        web3.utils.toWei("0.04", "gwei"),
+        web3.utils.toWei("0.04", "gwei")
       );
       try {
         const res = await launchpadContract.methods
